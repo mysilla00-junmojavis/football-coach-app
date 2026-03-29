@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useFormState, useFormStatus } from 'react-dom'
-import { Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -45,47 +44,10 @@ export function DrillForm({ action, defaultValues, submitLabel = '드릴 저장'
   const [minPlayers, setMinPlayers] = useState(defaultValues?.min_players?.toString() ?? '')
   const [maxPlayers, setMaxPlayers] = useState(defaultValues?.max_players?.toString() ?? '')
   const [difficulty, setDifficulty] = useState(defaultValues?.difficulty ?? 'medium')
-  const [aiLoading, setAiLoading] = useState(false)
-  const [aiError, setAiError] = useState('')
-
   function togglePurpose(p: string) {
     setSelectedPurposes((prev) =>
       prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
     )
-  }
-
-  async function handleAiGenerate() {
-    if (selectedPurposes.length === 0) {
-      setAiError('목적을 하나 이상 선택해주세요.')
-      return
-    }
-    setAiError('')
-    setAiLoading(true)
-    try {
-      const res = await fetch('/api/generate-drill', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          purposes: selectedPurposes,
-          duration: duration || 15,
-          minPlayers: minPlayers || 4,
-          maxPlayers: maxPlayers || 12,
-          difficulty,
-        }),
-      })
-      const data = await res.json()
-      if (data.error) {
-        setAiError(data.error)
-      } else {
-        if (data.name) setName(data.name)
-        if (data.description) setDescription(data.description)
-        if (data.equipment) setEquipment(data.equipment)
-      }
-    } catch {
-      setAiError('AI 생성 중 오류가 발생했습니다.')
-    } finally {
-      setAiLoading(false)
-    }
   }
 
   return (
@@ -113,19 +75,6 @@ export function DrillForm({ action, defaultValues, submitLabel = '드릴 저장'
           <input key={p} type="hidden" name="purpose" value={p} />
         ))}
       </div>
-
-      {/* AI 생성 버튼 */}
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full border-primary text-primary hover:bg-primary/5"
-        onClick={handleAiGenerate}
-        disabled={aiLoading}
-      >
-        <Sparkles size={15} className="mr-1.5" />
-        {aiLoading ? 'AI가 드릴을 만드는 중...' : 'AI로 드릴 자동 생성'}
-      </Button>
-      {aiError && <p className="text-sm text-red-500">{aiError}</p>}
 
       {/* 이름 */}
       <div className="space-y-1.5">
