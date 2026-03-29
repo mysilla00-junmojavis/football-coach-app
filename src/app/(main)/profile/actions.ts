@@ -25,8 +25,7 @@ export async function updateProfileAction(
 
   const { error } = await supabase
     .from('coaches')
-    .update({ name })
-    .eq('id', user.id)
+    .upsert({ id: user.id, name })
 
   if (error) return { error: error.message }
 
