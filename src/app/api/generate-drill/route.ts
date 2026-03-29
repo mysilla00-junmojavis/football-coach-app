@@ -24,13 +24,14 @@ export async function POST(req: NextRequest) {
 
   try {
     const { text } = await generateText({
-      model: anthropic('claude-haiku-4-5'),
+      model: anthropic('claude-haiku-4-5-20251001'),
       prompt,
     })
 
     const json = JSON.parse(text.replace(/```json\n?|\n?```/g, '').trim())
     return NextResponse.json(json)
-  } catch {
-    return NextResponse.json({ error: 'AI 생성 실패' }, { status: 500 })
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'AI 생성 실패'
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
